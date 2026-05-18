@@ -90,13 +90,11 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-w
 <div id="s-hjem"    class="screen active"></div>
 <div id="s-trening" class="screen"></div>
 <div id="s-mat"     class="screen"></div>
-<div id="s-ov"      class="screen"></div>
 <div id="s-sjekk"   class="screen"></div>
-<nav>
+<nav style="grid-template-columns:repeat(4,1fr)">
   <button class="nb active" onclick="go('hjem',this)"><i class="ti ti-home"></i>Hjem</button>
   <button class="nb" onclick="go('trening',this)"><i class="ti ti-barbell"></i>Trening</button>
   <button class="nb" onclick="go('mat',this)"><i class="ti ti-salad"></i>Mat</button>
-  <button class="nb" onclick="go('ov',this)"><i class="ti ti-list"></i>Øvelser</button>
   <button class="nb" onclick="go('sjekk',this)"><i class="ti ti-checkbox"></i>Sjekk</button>
 </nav>
 <script>
@@ -258,6 +256,70 @@ const LIFTS={
       {lbl:'Mål',kg:'3×10'},
     ]},
   ],
+  'Full kropp':[
+    {name:'Markløft',oneRM:160,tag:'tc',note:'Nøytral rygg, driv med hæler. Stang langs leggen.',sets:[
+      {lbl:'4×4 styrke',kg:'140kg'},
+      {lbl:'Backup sett',kg:'120kg'},
+      {lbl:'Oppvarming',kg:'95kg'},
+    ]},
+    {name:'Lat pulldown',oneRM:90,tag:'tt',note:'Len tilbake, trekk til øvre bryst.',sets:[
+      {lbl:'3×12',kg:'62kg'},
+      {lbl:'Lett sett',kg:'55kg'},
+      {lbl:'Oppvarming',kg:'45kg'},
+    ]},
+    {name:'Lunges',oneRM:null,tag:'tc',note:'Langt skritt, kne ikke forbi tå.',sets:[
+      {lbl:'3×12',kg:'~20kg'},
+      {lbl:'Lett sett',kg:'~15kg'},
+      {lbl:'Oppvarming',kg:'BV'},
+    ]},
+    {name:'DB skulderpress',oneRM:50,tag:'tp',note:'Hypertrofi-fokus. Kontrollert tempo.',sets:[
+      {lbl:'3×12',kg:'35kg'},
+      {lbl:'Lett sett',kg:'30kg'},
+      {lbl:'Oppvarming',kg:'25kg'},
+    ]},
+    {name:'Hammer curl',oneRM:null,tag:'tt',note:'Per hånd. Treffer brachialis.',sets:[
+      {lbl:'3×12',kg:'~18kg'},
+      {lbl:'Lett sett',kg:'~14kg'},
+      {lbl:'Oppvarming',kg:'~10kg'},
+    ]},
+    {name:'OH triceps ext.',oneRM:null,tag:'tp',note:'Full strekk på langt hode. Albuer inn.',sets:[
+      {lbl:'3×12',kg:'~30kg'},
+      {lbl:'Lett sett',kg:'~22kg'},
+      {lbl:'Oppvarming',kg:'~17kg'},
+    ]},
+  ],
+  'Armer':[
+    {name:'Stangcurl',oneRM:60,tag:'tt',note:'Ingen sving. Kontrollert ned.',sets:[
+      {lbl:'3×8–10',kg:'45kg'},
+      {lbl:'Lett sett',kg:'40kg'},
+      {lbl:'Oppvarming',kg:'32kg'},
+    ]},
+    {name:'Incline DB curl',oneRM:null,tag:'tt',note:'Per hånd. Full strekk i bunn.',sets:[
+      {lbl:'3×12',kg:'~14kg'},
+      {lbl:'Lett sett',kg:'~10kg'},
+      {lbl:'Oppvarming',kg:'~8kg'},
+    ]},
+    {name:'Kabel-curl høy remme',oneRM:null,tag:'tt',note:'Per hånd. Arm ut til siden, treffer topp av biceps.',sets:[
+      {lbl:'3×15',kg:'~12kg'},
+      {lbl:'Lett sett',kg:'~8kg'},
+      {lbl:'Oppvarming',kg:'~6kg'},
+    ]},
+    {name:'Close-grip benkpress',oneRM:85,tag:'tp',note:'Albuer inn. ~85% av benkpress.',sets:[
+      {lbl:'3×8–10',kg:'65kg'},
+      {lbl:'Lett sett',kg:'55kg'},
+      {lbl:'Oppvarming',kg:'47kg'},
+    ]},
+    {name:'OH triceps ext.',oneRM:null,tag:'tp',note:'Full strekk på langt hode.',sets:[
+      {lbl:'3×12',kg:'~30kg'},
+      {lbl:'Lett sett',kg:'~22kg'},
+      {lbl:'Oppvarming',kg:'~17kg'},
+    ]},
+    {name:'Triceps pushdown tau',oneRM:null,tag:'tp',note:'Splitt tau i bunn for ekstra kontraksjon.',sets:[
+      {lbl:'3×15–20',kg:'~30kg'},
+      {lbl:'Drop-set',kg:'~20kg'},
+      {lbl:'Oppvarming',kg:'~15kg'},
+    ]},
+  ],
   'Cardio':[
     {name:'Sone 2 løp/sykkel',oneRM:null,tag:'tb',note:'Du skal kunne snakke i setninger. Onsdag + lørdag.',sets:[
       {lbl:'Varighet',kg:'25 min'},
@@ -354,39 +416,75 @@ function renderHjem(){
   `;
 }
 
+function getDayCats(i){
+  const lbl=WEEK[i].label;
+  if(lbl.includes('Full')) return ['Full kropp'];
+  if(lbl.includes('Push')) return ['Push'];
+  if(lbl.includes('Pull')) return ['Pull'];
+  if(lbl.includes('Bein')) return ['Bein'];
+  if(lbl.includes('Armer')) return ['Skuldre','Armer'];
+  if(lbl.includes('Cardio')) return ['Cardio'];
+  return [];
+}
+
+function exHTML(cats, extra){
+  if(cats.length===0) return `<div class="card" style="text-align:center;padding:20px;color:var(--text2);">Hviledag — restitusjon er en del av treningen.</div>`;
+  let h='';
+  cats.forEach(cat=>{
+    h+=`<div class="slbl">${cat}</div>`;
+    (LIFTS[cat]||[]).forEach(e=>{
+      h+=`<div class="ec">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+          <span class="en">${e.name}</span>
+          <span class="tag ${e.tag}">${e.oneRM?e.oneRM+'kg 1RM':'Estimert'}</span>
+        </div>
+        <div class="enote">${e.note}</div>
+        <div class="sg">${e.sets.map(s=>`<div class="sb"><div class="skg">${s.kg}</div><div class="sd">${s.lbl}</div></div>`).join('')}</div>
+      </div>`;
+    });
+  });
+  if(extra&&extra.includes('Mage')){
+    h+=`<div class="slbl">Mage — 10 min</div>`;
+    (LIFTS['Mage']||[]).forEach(e=>{
+      h+=`<div class="ec">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+          <span class="en">${e.name}</span><span class="tag tb">Mage</span>
+        </div>
+        <div class="enote">${e.note}</div>
+        <div class="sg">${e.sets.map(s=>`<div class="sb"><div class="skg">${s.kg}</div><div class="sd">${s.lbl}</div></div>`).join('')}</div>
+      </div>`;
+    });
+  }
+  if(extra&&extra.includes('Cardio')){
+    h+=`<div class="slbl">Cardio — 25 min</div>
+    <div class="card">
+      <div class="row"><span>Type</span><span class="tag tb">Sone 2</span></div>
+      <div class="row"><span>Puls</span><span style="font-size:13px;color:var(--text2);">120–140 bpm</span></div>
+      <div class="row"><span>Varighet</span><span style="font-size:13px;color:var(--text2);">25 minutter</span></div>
+    </div>`;
+  }
+  return h;
+}
+
+function showDay(i){
+  document.querySelectorAll('#daypills .pill').forEach((p,idx)=>p.classList.toggle('active',idx===i));
+  document.getElementById('dayex').innerHTML=exHTML(getDayCats(i),WEEK[i].extra);
+}
+
 function renderTrening(){
+  const ti=(TODAY.getDay()+6)%7;
+  const tp=WEEK[ti];
+  const dots=WEEK.map((w,i)=>{
+    if(i===ti) return `<div style="width:34px;height:34px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">${w.day.slice(0,1)}</div>`;
+    if(i<ti)   return `<div style="width:34px;height:34px;border-radius:50%;background:var(--bg2);color:var(--text3);display:flex;align-items:center;justify-content:center;font-size:11px;">${w.day.slice(0,1)}</div>`;
+    return `<div style="width:34px;height:34px;border-radius:50%;border:0.5px solid var(--border);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:11px;">${w.day.slice(0,1)}</div>`;
+  }).join('');
+  const pills=WEEK.map((w,i)=>`<button class="pill ${i===ti?'active':''}" onclick="showDay(${i})">${w.day}</button>`).join('');
   document.getElementById('s-trening').innerHTML=`
-    <div class="top"><h1>Trening</h1><p>5 dager · Armer & skuldre-fokus</p></div>
-    <div class="slbl">Ukessplit</div>
-    <div class="card">
-      ${WEEK.map((w,i)=>{
-        const isT=i===((TODAY.getDay()+6)%7);
-        return `<div class="row" style="${isT?'font-weight:500;':''}">
-          <span style="min-width:34px;font-size:12px;color:var(--text2);">${w.day}</span>
-          <div class="rm"><div>${w.label}</div>${w.extra?`<div class="rs">${w.extra}</div>`:''}</div>
-          ${isT?'<span style="font-size:11px;color:var(--purple);">i dag</span>':''}
-        </div>`;
-      }).join('')}
-    </div>
-    <div class="slbl">Din 1RM</div>
-    <div class="card">
-      <div class="row"><span>Benkpress</span><span class="tag tp">100 kg</span></div>
-      <div class="row"><span>Militærpress</span><span class="tag tp">60 kg</span></div>
-      <div class="row"><span>Knebøy</span><span class="tag tc">120 kg</span></div>
-      <div class="row"><span>Markløft</span><span class="tag tc">160 kg</span></div>
-      <div class="row"><span>Chins</span><span class="tag tt">95 kg (BV)</span></div>
-    </div>
-    <div class="slbl">Cardio — 2×/uke</div>
-    <div class="card">
-      <div class="row"><span>Onsdag</span><span class="tag tb">Etter bein · 25 min</span></div>
-      <div class="row"><span>Lørdag</span><span class="tag tb">Alene · 25 min</span></div>
-      <div class="row"><span>Type</span><span style="font-size:13px;color:var(--text2);">Sone 2 — rolig tempo</span></div>
-    </div>
-    <div class="slbl">Mage — 2×/uke</div>
-    <div class="card">
-      <div class="row"><span>Mandag</span><span class="tag tb">Etter push · 10 min</span></div>
-      <div class="row"><span>Torsdag</span><span class="tag tb">Etter armer · 10 min</span></div>
-    </div>
+    <div class="top"><h1>Trening</h1><p>${tp.label}${tp.extra?' · '+tp.extra:''}</p></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px;">${dots}</div>
+    <div class="pills" id="daypills">${pills}</div>
+    <div id="dayex">${exHTML(getDayCats(ti),tp.extra)}</div>
   `;
 }
 
@@ -414,40 +512,6 @@ function renderMat(){
 }
 
 function switchMeal(day){mealDay=day;renderMat();}
-
-function renderOv(){
-  const cats=Object.keys(LIFTS);
-  document.getElementById('s-ov').innerHTML=`
-    <div class="top"><h1>Øvelser</h1><p>Vekter fra din 1RM</p></div>
-    <div class="tipbox">Rundet til nærmeste 2,5 kg. Juster hvis det føles feil første gang.</div>
-    <div class="pills" id="expills">
-      ${cats.map(c=>`<button class="pill ${c===exCat?'active':''}" onclick="swCat('${c}')">${c}</button>`).join('')}
-    </div>
-    <div id="exlist"></div>
-  `;
-  renderExList();
-}
-
-function swCat(cat){
-  exCat=cat;
-  document.querySelectorAll('#expills .pill').forEach(p=>p.classList.toggle('active',p.textContent===cat));
-  renderExList();
-}
-
-function renderExList(){
-  const items=LIFTS[exCat]||[];
-  document.getElementById('exlist').innerHTML=items.map(e=>`
-    <div class="ec">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
-        <span class="en">${e.name}</span>
-        <span class="tag ${e.tag}">${e.oneRM?e.oneRM+'kg 1RM':'Estimert'}</span>
-      </div>
-      <div class="enote">${e.note}</div>
-      <div class="sg">
-        ${e.sets.map(s=>`<div class="sb"><div class="skg">${s.kg}</div><div class="sd">${s.lbl}</div></div>`).join('')}
-      </div>
-    </div>`).join('');
-}
 
 function renderSjekk(){
   const done=checks.length;
@@ -481,7 +545,6 @@ function render(id){
   if(id==='hjem')renderHjem();
   if(id==='trening')renderTrening();
   if(id==='mat')renderMat();
-  if(id==='ov')renderOv();
   if(id==='sjekk')renderSjekk();
 }
 renderHjem();
