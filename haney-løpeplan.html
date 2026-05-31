@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Haney × HM">
+<title>Haney × Halvmaraton</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: #252525;
+    --accent: #c8f000;
+    --accent2: #00e5c8;
+    --accent3: #ff5c35;
+    --run: #ff8c42;
+    --text: #f0ede6;
+    --muted: #666;
+    --muted2: #999;
+    --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bot: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .app-header {
+    position: sticky; top: 0; z-index: 100;
+    padding: calc(var(--safe-top) + 12px) 20px 12px;
+    background: rgba(10,10,10,0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 1px; line-height: 1;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo-main { color: var(--accent); }
+  .logo-sep { color: var(--border); font-size: 18px; }
+  .logo-sub { color: var(--run); }
+  .header-right { display: flex; gap: 8px; align-items: center; }
+  .week-badge {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted2); font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 99px; letter-spacing: 0.5px;
+  }
+  .reset-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); font-family: 'DM Sans', sans-serif;
+    font-size: 11px; padding: 5px 12px; border-radius: 99px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .reset-btn:active { background: var(--border); color: var(--text); }
+
+  /* NAV TABS */
+  .nav-tabs {
+    display: flex; gap: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-tab {
+    flex: 1; padding: 11px 6px; text-align: center;
+    font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.5px; color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+    background: transparent; border-top: none; border-left: none; border-right: none;
+  }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .nav-tab.run-tab.active { color: var(--run); border-bottom-color: var(--run); }
+
+  /* CONTENT */
+  .content { padding: 0 0 calc(var(--safe-bot) + 32px); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ═══ PLAN OVERVIEW ═══ */
+  .overview-header {
+    padding: 24px 20px 16px;
+    background: linear-gradient(180deg, #0f1a00 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .ov-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 1px; line-height: 1; color: var(--text); }
+  .ov-sub { font-size: 13px; color: var(--muted2); margin-top: 4px; }
+  .ov-meta { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .ov-chip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 5px 12px; border-radius: 99px; font-size: 12px; color: var(--muted2);
+  }
+  .ov-chip .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-green { background: var(--accent); }
+  .dot-orange { background: var(--run); }
+  .dot-cyan { background: var(--accent2); }
+
+  .week-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+
+  .week-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .week-card:active { border-color: var(--accent); }
+  .week-card-header {
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  }
+  .wk-num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 28px;
+    color: var(--border); line-height: 1; flex-shrink: 0; width: 32px;
+    transition: color 0.2s;
+  }
+  .week-card.current .wk-num { color: var(--accent); }
+  .wk-info { flex: 1; }
+  .wk-phase {
+    font-size: 10px; font-weight: 600; letter-spacing: 2px;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 2px;
+  }
+  .wk-focus { font-size: 14px; font-weight: 500; color: var(--text); }
+  .wk-pills { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .wk-pill {
+    font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 600;
+  }
+  .pill-run { background: rgba(255,140,66,0.15); color: var(--run); }
+  .pill-strength { background: rgba(200,240,0,0.12); color: var(--accent); }
+  .pill-rest { background: var(--surface2); color: var(--muted); }
+  .wk-expand { color: var(--muted); font-size: 18px; flex-shrink: 0; transition: transform 0.2s; }
+  .week-card.open .wk-expand { transform: rotate(90deg); }
+
+  .week-days {
+    display: none; border-top: 1px solid var(--border);
+    padding: 0;
+  }
+  .week-card.open .week-days { display: block; }
+  .day-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-name {
+    font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px;
+    width: 30px; flex-shrink: 0; padding-top: 2px;
+  }
+  .day-activities { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .activity-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 500;
+    width: fit-content;
+  }
+  .at-strength { background: rgba(200,240,0,0.1); color: var(--accent); border: 1px solid rgba(200,240,0,0.2); }
+  .at-run { background: rgba(255,140,66,0.1); color: var(--run); border: 1px solid rgba(255,140,66,0.2); }
+  .at-rest { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .at-icon { font-size: 13px; }
+  .day-note { font-size: 11px; color: var(--muted); margin-top: 2px; font-style: italic; }
+
+  .current-badge {
+    background: var(--accent); color: #0a0a0a; font-size: 9px; font-weight: 700;
+    padding: 2px 7px; border-radius: 99px; letter-spacing: 0.5px;
+  }
+
+  /* ═══ WEEKLY SCHEDULE ═══ */
+  .schedule-header {
+    padding: 20px 20px 16px;
+    background: linear-gradient(180deg, #0f1a00 0%, var(--bg) 100%);
+  }
+  .sh-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .sh-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; }
+  .sh-week-nav { display: flex; gap: 8px; align-items: center; }
+  .week-nav-btn {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--muted2);
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .week-nav-btn:active { background: var(--border); }
+  .week-nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .sh-sub { font-size: 12px; color: var(--muted2); }
+
+  .week-summary-strip {
+    display: flex; gap: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .wss-item { flex: 1; padding: 10px 6px; text-align: center; border-right: 1px solid var(--border); }
+  .wss-item:last-child { border-right: none; }
+  .wss-val { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--text); }
+  .wss-val.run-val { color: var(--run); }
+  .wss-val.str-val { color: var(--accent); }
+  .wss-label { font-size: 9px; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; margin-top: 1px; }
+
+  .schedule-days { padding: 12px 20px; display: flex; flex-direction: column; gap: 8px; }
+  .sched-day-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .sched-day-card.today { border-color: rgba(200,240,0,0.4); }
+  .sdc-header { display: flex; align-items: center; gap: 12px; padding: 13px 15px; }
+  .sdc-day { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--muted); line-height: 1; width: 44px; flex-shrink: 0; }
+  .sdc-day.today-label { color: var(--accent); }
+  .sdc-content { flex: 1; }
+  .sdc-primary { font-size: 14px; font-weight: 500; color: var(--text); }
+  .sdc-secondary { font-size: 12px; color: var(--muted2); margin-top: 2px; }
+  .sdc-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .sdc-badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; }
+  .badge-s { background: rgba(200,240,0,0.12); color: var(--accent); }
+  .badge-r { background: rgba(255,140,66,0.12); color: var(--run); }
+  .badge-rest { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .today-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  /* ═══ STYRKE DAYS ═══ */
+  .day-hero {
+    padding: 22px 20px; position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .day-hero::after {
+    content: attr(data-num);
+    position: absolute; right: -10px; top: -10px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 120px;
+    color: rgba(255,255,255,0.03); line-height: 1; pointer-events: none;
+  }
+  .day1-bg { background: linear-gradient(135deg, #0f1520 0%, #0a0a0a 100%); }
+  .day2-bg { background: linear-gradient(135deg, #0a1a10 0%, #0a0a0a 100%); }
+  .day3-bg { background: linear-gradient(135deg, #1a0f0a 0%, #0a0a0a 100%); }
+  .dh-num { font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: 4px; color: var(--muted); margin-bottom: 6px; }
+  .dh-title { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 1px; line-height: 1.05; }
+  .dh-sub { font-size: 12px; color: var(--muted2); margin-top: 5px; }
+  .dh-progress-wrap { margin-top: 16px; }
+  .dh-bar-track { height: 3px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
+  .dh-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  .dh-count { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 3px;
+    color: var(--muted); margin: 20px 20px 8px; padding: 0;
+  }
+
+  .ex-card {
+    background: var(--surface); border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); margin-bottom: -1px;
+    transition: background 0.2s;
+  }
+  .ex-card.done { background: rgba(200,240,0,0.04); }
+  .ex-main { display: flex; align-items: center; gap: 14px; padding: 13px 20px; cursor: pointer; }
+  .ex-check {
+    width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--border);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; background: transparent;
+  }
+  .ex-card.done .ex-check { background: var(--accent); border-color: var(--accent); }
+  .checkmark { width: 11px; height: 11px; opacity: 0; transition: opacity 0.2s; }
+  .ex-card.done .checkmark { opacity: 1; }
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ex-card.done .ex-name { color: var(--muted); text-decoration: line-through; }
+  .ex-meta { display: flex; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
+  .ex-tag { font-size: 11px; padding: 2px 7px; border-radius: 99px; background: var(--surface2); color: var(--muted); }
+  .ex-tag.weight { background: rgba(200,240,0,0.1); color: var(--accent); font-weight: 600; }
+  .ex-expand { color: var(--muted); font-size: 16px; flex-shrink: 0; transition: transform 0.2s; }
+  .ex-card.open .ex-expand { transform: rotate(180deg); }
+  .ex-detail { display: none; padding: 0 20px 13px 58px; font-size: 12px; color: var(--muted2); line-height: 1.6; border-top: 1px solid var(--border); }
+  .ex-detail.open { display: block; padding-top: 10px; }
+  .tip-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--accent2); margin-bottom: 3px; }
+
+  /* ═══ LØPING ═══ */
+  .run-hero {
+    padding: 24px 20px 20px;
+    background: linear-gradient(135deg, #1a0d00 0%, #0a0a0a 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .rh-label { font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: 4px; color: var(--run); opacity: 0.7; margin-bottom: 6px; }
+  .rh-title { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 1px; color: var(--text); line-height: 1; }
+  .rh-goal { font-size: 12px; color: var(--muted2); margin-top: 5px; }
+  .rh-countdown { margin-top: 16px; display: flex; gap: 10px; }
+  .countdown-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; text-align: center; flex: 1;
+  }
+  .cd-val { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--run); line-height: 1; }
+  .cd-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+  .run-week-selector {
+    display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
+    padding: 12px 20px; border-bottom: 1px solid var(--border);
+  }
+  .run-week-selector::-webkit-scrollbar { display: none; }
+  .rws-btn {
+    flex-shrink: 0; padding: 7px 14px; border-radius: 99px; border: 1.5px solid var(--border);
+    background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500; cursor: pointer; margin-right: 6px; transition: all 0.2s;
+  }
+  .rws-btn.active { background: var(--run); border-color: var(--run); color: #0a0a0a; font-weight: 700; }
+
+  .run-sessions { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+
+  .run-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .rc-header { display: flex; align-items: center; gap: 14px; padding: 15px 16px; cursor: pointer; }
+  .rc-type-icon {
+    width: 40px; height: 40px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+  }
+  .icon-interval { background: rgba(255,92,53,0.15); }
+  .icon-long { background: rgba(255,140,66,0.15); }
+  .icon-easy { background: rgba(0,229,200,0.1); }
+  .rc-info { flex: 1; }
+  .rc-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .rc-meta { font-size: 12px; color: var(--muted2); margin-top: 2px; }
+  .rc-expand { color: var(--muted); font-size: 16px; flex-shrink: 0; transition: transform 0.2s; }
+  .run-card.open .rc-expand { transform: rotate(180deg); }
+  .rc-detail { display: none; border-top: 1px solid var(--border); padding: 14px 16px; }
+  .run-card.open .rc-detail { display: block; }
+  .rc-detail-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--run); margin-bottom: 8px; }
+  .rc-steps { display: flex; flex-direction: column; gap: 8px; }
+  .rc-step {
+    display: flex; gap: 10px; font-size: 12px; color: var(--muted2); line-height: 1.5; align-items: flex-start;
+  }
+  .rc-step-num {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--muted); flex-shrink: 0; margin-top: 1px;
+  }
+  .rc-step-text strong { color: var(--text); }
+
+  .run-tip-box {
+    background: rgba(255,140,66,0.06); border: 1px solid rgba(255,140,66,0.2);
+    border-radius: 10px; padding: 12px 14px; margin: 0 20px 20px;
+    font-size: 12px; color: var(--muted2); line-height: 1.6;
+  }
+  .run-tip-box strong { color: var(--run); }
+
+  .principles-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; margin: 0 20px 24px;
+  }
+  .principles-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 2px; color: var(--accent); margin-bottom: 12px; }
+  .principle-item { display: flex; gap: 8px; margin-bottom: 8px; font-size: 12px; color: var(--muted2); line-height: 1.5; }
+  .principle-item:last-child { margin-bottom: 0; }
+  .p-dot { color: var(--accent); flex-shrink: 0; }
+
+  /* REST */
+  .rest-view { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 40px 20px; }
+  .rest-icon { font-size: 56px; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .rest-title { font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: 2px; }
+  .rest-sub { font-size: 13px; color: var(--muted2); max-width: 240px; line-height: 1.6; margin-top: 8px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: calc(var(--safe-bot) + 24px); left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--accent); color: #0a0a0a; font-weight: 700; font-size: 12px;
+    padding: 9px 20px; border-radius: 99px; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 999; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.run-toast { background: var(--run); }
+
+  /* Phase stripe */
+  .phase-stripe {
+    padding: 8px 20px; font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; border-bottom: 1px solid var(--border);
+  }
+  .phase-build { background: rgba(200,240,0,0.06); color: var(--accent); }
+  .phase-volume { background: rgba(255,140,66,0.06); color: var(--run); }
+  .phase-peak { background: rgba(255,92,53,0.06); color: var(--accent3); }
+  .phase-taper { background: rgba(0,229,200,0.06); color: var(--accent2); }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-main">HANEY</span>
+      <span class="logo-sep">×</span>
+      <span class="logo-sub">HM22.AUG</span>
+    </div>
+    <div class="header-right">
+      <div class="week-badge" id="weekBadge">UKE 1</div>
+      <button class="reset-btn" onclick="resetCurrentDay()">Nullstill</button>
+    </div>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="switchMain(0)">PLAN</button>
+  <button class="nav-tab" onclick="switchMain(1)">UKE</button>
+  <button class="nav-tab" onclick="switchMain(2)">STYRKE</button>
+  <button class="nav-tab run-tab" onclick="switchMain(3)">LØPING</button>
+</div>
+
+<div class="content">
+
+<!-- ═══ PANEL 0: PLAN OVERVIEW ═══ -->
+<div class="tab-panel active" id="main-0">
+  <div class="overview-header">
+    <div class="ov-title">12-UKERS<br>HALVMARATON</div>
+    <div class="ov-sub">22. august 2025 · Mål: sub 1:55</div>
+    <div class="ov-meta">
+      <div class="ov-chip"><div class="dot dot-green"></div>6 styrkeøkter/uke</div>
+      <div class="ov-chip"><div class="dot dot-orange"></div>3 løpeøkter/uke</div>
+      <div class="ov-chip"><div class="dot dot-cyan"></div>21,1 km distanse</div>
+    </div>
+  </div>
+  <div class="week-list" id="weekList"></div>
+</div>
+
+<!-- ═══ PANEL 1: UKE SCHEDULE ═══ -->
+<div class="tab-panel" id="main-1">
+  <div class="schedule-header">
+    <div class="sh-top">
+      <div class="sh-title">UKEPLAN</div>
+      <div class="sh-week-nav">
+        <button class="week-nav-btn" id="prevWeekBtn" onclick="changeSchedWeek(-1)">‹</button>
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--muted2)" id="schedWeekLabel">UKE 1</span>
+        <button class="week-nav-btn" id="nextWeekBtn" onclick="changeSchedWeek(1)">›</button>
+      </div>
+    </div>
+    <div class="sh-sub" id="schedWeekSub"></div>
+  </div>
+  <div class="week-summary-strip">
+    <div class="wss-item"><div class="wss-val str-val" id="ssStrength">6</div><div class="wss-label">Styrke</div></div>
+    <div class="wss-item"><div class="wss-val run-val" id="ssRun">3</div><div class="wss-label">Løpeøkter</div></div>
+    <div class="wss-item"><div class="wss-val run-val" id="ssKm">—</div><div class="wss-label">Langtur km</div></div>
+    <div class="wss-item"><div class="wss-val" id="ssLoad">Medium</div><div class="wss-label">Belastning</div></div>
+  </div>
+  <div class="schedule-days" id="schedDays"></div>
+</div>
+
+<!-- ═══ PANEL 2: STYRKE ═══ -->
+<div class="tab-panel" id="main-2">
+  <div class="nav-tabs" style="position:sticky;top:56px;z-index:50;">
+    <button class="nav-tab active" onclick="switchStrength(0)">DAG 1</button>
+    <button class="nav-tab" onclick="switchStrength(1)">DAG 2</button>
+    <button class="nav-tab" onclick="switchStrength(2)">DAG 3</button>
+    <button class="nav-tab" onclick="switchStrength(3)">HVILE</button>
+  </div>
+
+  <!-- DAG 1 -->
+  <div class="tab-panel active" id="str-0">
+    <div class="day-hero day1-bg" data-num="01">
+      <div class="dh-num">STYRKE · DAG 01</div>
+      <div class="dh-title">Bryst &<br>Armer</div>
+      <div class="dh-sub">Push + Pull · Abs + Legger</div>
+      <div class="dh-progress-wrap">
+        <div class="dh-bar-track"><div class="dh-bar-fill" id="sprog-0" style="width:0%"></div></div>
+        <div class="dh-count" id="scnt-0">0 av 14 øvelser fullført</div>
+      </div>
+    </div>
+    <div class="section-label">BRYST</div>
+    <div class="ex-card" data-day="0" data-id="0" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Benkpress (stang)</div><div class="ex-meta"><span class="ex-tag">4 × 6–8</span><span class="ex-tag weight">70–75 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Kontrollert ned, eksplosivt opp. Skulderblader trukket inn og ned.</div></div>
+    <div class="ex-card" data-day="0" data-id="1" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Benkpress (manualer)</div><div class="ex-meta"><span class="ex-tag">3 × 8–10</span><span class="ex-tag weight">65–70 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Full bevegelsesbane. La manualsene møtes i topp uten å slå dem sammen.</div></div>
+    <div class="ex-card" data-day="0" data-id="2" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Inklinert benkpress</div><div class="ex-meta"><span class="ex-tag">4 × 6–8</span><span class="ex-tag weight">67–72 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>30–45° vinkel. Fokuser på øvre bryst.</div></div>
+    <div class="ex-card" data-day="0" data-id="3" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Inklinert manualpress</div><div class="ex-meta"><span class="ex-tag">3 × 8–10</span><span class="ex-tag weight">28–32 kg/hånd</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Strekk skikkelig i bunnen. Langsom negativ (3 sek ned).</div></div>
+    <div class="section-label">BICEPS</div>
+    <div class="ex-card" data-day="0" data-id="4" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Bicepscurl (stang)</div><div class="ex-meta"><span class="ex-tag">4 × 8–10</span><span class="ex-tag weight">36–43 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Ingen svinging. Klem biceps hardt i topp, langsom negativ.</div></div>
+    <div class="ex-card" data-day="0" data-id="5" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Preacher curl</div><div class="ex-meta"><span class="ex-tag">4 × 8–10</span><span class="ex-tag weight">29–36 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Full ekstensjon i bunn — ikke cutte bevegelsen.</div></div>
+    <div class="section-label">TRICEPS</div>
+    <div class="ex-card" data-day="0" data-id="6" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Kabel tricepsextension</div><div class="ex-meta"><span class="ex-tag">4 × 10–12</span><span class="ex-tag weight">27–34 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Albuer tett inn mot kroppen. Klem triceps hardt i bunn.</div></div>
+    <div class="ex-card" data-day="0" data-id="7" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Skullcrushers</div><div class="ex-meta"><span class="ex-tag">4 × 6–8</span><span class="ex-tag weight">40–47 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Langsomt ned. Albuer peker mot taket.</div></div>
+    <div class="section-label">ABS & LEGGER</div>
+    <div class="ex-card" data-day="0" data-id="8" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Hengende beinhev</div><div class="ex-meta"><span class="ex-tag">4 × 15–20</span><span class="ex-tag weight">Kroppsvekt</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Kontrollert og sakte. Ikke sving med momentum.</div></div>
+    <div class="ex-card" data-day="0" data-id="9" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Inklinert situps</div><div class="ex-meta"><span class="ex-tag">4 × 15–20</span><span class="ex-tag weight">Kroppsvekt</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>La magen gjøre jobben, ikke hoftefleksorer.</div></div>
+    <div class="ex-card" data-day="0" data-id="10" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Sittende beinhev</div><div class="ex-meta"><span class="ex-tag">4 × 15–20</span><span class="ex-tag weight">Kroppsvekt</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Klem i bunn. Hold 1 sek i topp.</div></div>
+    <div class="ex-card" data-day="0" data-id="11" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Stående tåhev</div><div class="ex-meta"><span class="ex-tag">6 × 15–20</span><span class="ex-tag weight">88–105 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Full ROM — helt ned, helt opp.</div></div>
+    <div class="ex-card" data-day="0" data-id="12" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Sittende tåhev</div><div class="ex-meta"><span class="ex-tag">3–4 × 15–20</span><span class="ex-tag weight">44–55 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Langsom negativ (3 sek). Treffer den indre soleus-muskelen.</div></div>
+    <div style="height:20px"></div>
+    <div class="principles-box">
+      <div class="principles-title">Haneys prinsipper</div>
+      <div class="principle-item"><span class="p-dot">›</span>«Stimulate, don't annihilate» — tren til vekst, ikke utmattelse</div>
+      <div class="principle-item"><span class="p-dot">›</span>Unngå failure — øker skaderisiko og bremser restitusjon</div>
+      <div class="principle-item"><span class="p-dot">›</span>Øk 2,5 kg når du klarer øvre rep-grense på alle sett</div>
+    </div>
+  </div>
+
+  <!-- DAG 2 -->
+  <div class="tab-panel" id="str-1">
+    <div class="day-hero day2-bg" data-num="02">
+      <div class="dh-num">STYRKE · DAG 02</div>
+      <div class="dh-title">Ben</div>
+      <div class="dh-sub">Quad + Hamstrings · Abs + Legger</div>
+      <div class="dh-progress-wrap">
+        <div class="dh-bar-track"><div class="dh-bar-fill" id="sprog-1" style="width:0%"></div></div>
+        <div class="dh-count" id="scnt-1">0 av 10 øvelser fullført</div>
+      </div>
+    </div>
+    <div class="run-tip-box">⚡ <strong>Løpsuker:</strong> Legg lett løp (30–40 min) etter denne økten. Reduser knebøy og benpress med 1 sett i uke 7–12.</div>
+    <div class="section-label">QUADRICEPS</div>
+    <div class="ex-card" data-day="1" data-id="0" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Benekstensjon (oppvarming)</div><div class="ex-meta"><span class="ex-tag">4 × 12–15</span><span class="ex-tag weight">34–43 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Aktiver quads mentalt. Dette er oppvarming — ikke til failure.</div></div>
+    <div class="ex-card" data-day="1" data-id="1" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Knebøy</div><div class="ex-meta"><span class="ex-tag">4–5 × 8–10</span><span class="ex-tag weight">69–75 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Hæler i gulvet hele veien. Dyp nok til at lår er parallelt.</div></div>
+    <div class="ex-card" data-day="1" data-id="2" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Benpress (annenhver økt)</div><div class="ex-meta"><span class="ex-tag">4 × 10–12</span><span class="ex-tag weight">145–155 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Ikke lås knærne i topp. Fot skulderbredde.</div></div>
+    <div class="section-label">HAMSTRINGS</div>
+    <div class="ex-card" data-day="1" data-id="3" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Leg curl</div><div class="ex-meta"><span class="ex-tag">4 × 8–10</span><span class="ex-tag weight">32–41 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Klem hamstrings hardt i topp. Langsom negativ — 3 sek ned.</div></div>
+    <div class="ex-card" data-day="1" data-id="4" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Stivbeint markløft (ann.)</div><div class="ex-meta"><span class="ex-tag">3–4 × 8–10</span><span class="ex-tag weight">99–110 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Strekk skikkelig i hamstrings i bunn. Rett rygg hele veien.</div></div>
+    <div class="section-label">ABS & LEGGER</div>
+    <div class="ex-card" data-day="1" data-id="5" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Hengende beinhev</div><div class="ex-meta"><span class="ex-tag">4 × 15–20</span><span class="ex-tag weight">Kroppsvekt</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Kontrollert og sakte.</div></div>
+    <div class="ex-card" data-day="1" data-id="6" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Inklinert situps</div><div class="ex-meta"><span class="ex-tag">4 × 15–20</span><span class="ex-tag weight">Kroppsvekt</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>La magen gjøre jobben.</div></div>
+    <div class="ex-card" data-day="1" data-id="7" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Stående tåhev</div><div class="ex-meta"><span class="ex-tag">6 × 15–20</span><span class="ex-tag weight">88–105 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Full ROM. Helt ned, helt opp.</div></div>
+    <div class="ex-card" data-day="1" data-id="8" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Sittende tåhev</div><div class="ex-meta"><span class="ex-tag">3–4 × 15–20</span><span class="ex-tag weight">44–55 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Langsom negativ 3 sek. Treffer soleus.</div></div>
+    <div style="height:24px"></div>
+  </div>
+
+  <!-- DAG 3 -->
+  <div class="tab-panel" id="str-2">
+    <div class="day-hero day3-bg" data-num="03">
+      <div class="dh-num">STYRKE · DAG 03</div>
+      <div class="dh-title">Rygg &<br>Skuldre</div>
+      <div class="dh-sub">Pull + Push · Abs + Legger</div>
+      <div class="dh-progress-wrap">
+        <div class="dh-bar-track"><div class="dh-bar-fill" id="sprog-2" style="width:0%"></div></div>
+        <div class="dh-count" id="scnt-2">0 av 11 øvelser fullført</div>
+      </div>
+    </div>
+    <div class="section-label">RYGG</div>
+    <div class="ex-card" data-day="2" data-id="0" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Nedtrekk foran (kabel)</div><div class="ex-meta"><span class="ex-tag">4 × 8–10</span><span class="ex-tag weight">67–78 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Trekk til øvre bryst. Len deg svakt bakover.</div></div>
+    <div class="ex-card" data-day="2" data-id="1" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Roing (stang / T-bar)</div><div class="ex-meta"><span class="ex-tag">4 × 6–8</span><span class="ex-tag weight">81–93 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Albuer tett inn. Trekk til navlen. Klem skulderblader i topp.</div></div>
+    <div class="ex-card" data-day="2" data-id="2" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Kabelroing</div><div class="ex-meta"><span class="ex-tag">4 × 8–10</span><span class="ex-tag weight">67–78 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Rett rygg hele veien.</div></div>
+    <div class="section-label">SKULDRE</div>
+    <div class="ex-card" data-day="2" data-id="3" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Military press</div><div class="ex-meta"><span class="ex-tag">4–5 × 6–8</span><span class="ex-tag weight">47–54 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Core stram. Press rett opp, ikke foran.</div></div>
+    <div class="ex-card" data-day="2" data-id="4" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Sideheving (manualer)</div><div class="ex-meta"><span class="ex-tag">4 × 8–10</span><span class="ex-tag weight">13–16 kg/hånd</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Lett fremover-helling. Pinky opp i topp.</div></div>
+    <div class="ex-card" data-day="2" data-id="5" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Upright row</div><div class="ex-meta"><span class="ex-tag">4 × 6–8</span><span class="ex-tag weight">34–41 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Albuer over hender i topp. Bredt grep for skulder-fokus.</div></div>
+    <div class="section-label">ABS & LEGGER</div>
+    <div class="ex-card" data-day="2" data-id="6" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Hengende beinhev</div><div class="ex-meta"><span class="ex-tag">4 × 15–20</span><span class="ex-tag weight">Kroppsvekt</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Kontrollert og sakte.</div></div>
+    <div class="ex-card" data-day="2" data-id="7" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Inklinert situps</div><div class="ex-meta"><span class="ex-tag">4 × 15–20</span><span class="ex-tag weight">Kroppsvekt</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>La magen gjøre jobben.</div></div>
+    <div class="ex-card" data-day="2" data-id="8" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Stående tåhev</div><div class="ex-meta"><span class="ex-tag">6 × 15–20</span><span class="ex-tag weight">88–105 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Full ROM.</div></div>
+    <div class="ex-card" data-day="2" data-id="9" onclick="toggleEx(this)"><div class="ex-main"><div class="ex-check"><svg class="checkmark" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ex-info"><div class="ex-name">Sittende tåhev</div><div class="ex-meta"><span class="ex-tag">3–4 × 15–20</span><span class="ex-tag weight">44–55 kg</span></div></div><div class="ex-expand">›</div></div><div class="ex-detail"><div class="tip-label">TIPS</div>Langsom negativ 3 sek.</div></div>
+    <div style="height:24px"></div>
+  </div>
+
+  <!-- HVILE -->
+  <div class="tab-panel" id="str-3">
+    <div class="rest-view">
+      <div class="rest-icon">💤</div>
+      <div class="rest-title">Hviledag</div>
+      <div class="rest-sub">Restitusjon er der muskler vokser og løpsbein heles. Spis godt, sov godt.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANEL 3: LØPING ═══ -->
+<div class="tab-panel" id="main-3">
+  <div class="run-hero">
+    <div class="rh-label">HALVMARATON · 22. AUGUST</div>
+    <div class="rh-title">LØPING &<br>KONDISJON</div>
+    <div class="rh-goal">Mål: sub 1:55 · 3 øvelser/uke</div>
+    <div class="rh-countdown" id="countdown"></div>
+  </div>
+
+  <div class="run-week-selector" id="runWeekSelector"></div>
+
+  <div class="run-sessions" id="runSessions"></div>
+</div>
+
+</div><!-- end content -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════
+// DATA
+// ════════════════════════════════
+
+const RACE_DATE = new Date('2025-08-22');
+
+const WEEKS = [
+  { phase: 'BYGGEFASE', focus: 'Kom i gang', km: 10, load: 'Lett', interval: '5×3 min hard / 2 min pause', long: '10 km rolig', easy: '30 min rolig', intervalNote: 'Rolig start. Fokus på teknikk og rytme.', longNote: 'Under 70% av maks puls. Prat-tempo.', easyNote: 'Aktiv restitusjon. Løp etter ben-styrke.' },
+  { phase: 'BYGGEFASE', focus: 'Bygg vane', km: 11, load: 'Lett', interval: '5×3 min hard / 2 min pause', long: '11 km rolig', easy: '30 min rolig', intervalNote: 'Samme som uke 1. Fokus på jevn innsats.', longNote: 'Øk litt tempo på siste 2 km.', easyNote: 'Etter ben-dag. Lett trav.' },
+  { phase: 'BYGGEFASE', focus: 'Øk volum', km: 13, load: 'Medium', interval: '6×3 min hard / 90 sek pause', long: '12 km rolig', easy: '35 min rolig', intervalNote: 'Kortere pause øker utfordringen.', longNote: 'Samme tempo, lenger distanse.', easyNote: 'Husk å spise nok karbohydrater.' },
+  { phase: 'VOLUMFASE', focus: 'Mer intensitet', km: 15, load: 'Medium', interval: '6×4 min hard / 2 min pause', long: '13 km', easy: '35 min rolig', intervalNote: 'Lengre intervaller. 90% maks puls.', longNote: 'De siste 3 km i halvmaratonfart.', easyNote: 'Rolig. Ikke press.' },
+  { phase: 'VOLUMFASE', focus: 'Sterkere base', km: 17, load: 'Medium', interval: '6×4 min hard / 2 min pause', long: '15 km', easy: '40 min rolig', intervalNote: 'Prøv bakkeintervaller i stedet.', longNote: 'Bygg selvtillit på distansen.', easyNote: 'Etter ben-styrke som vanlig.' },
+  { phase: 'VOLUMFASE', focus: 'Push videre', km: 18, load: 'Medium+', interval: '7×4 min hard / 90 sek pause', long: '16 km', easy: '40 min rolig', intervalNote: 'Kortere pause, mer volum. Tøft!', longNote: 'Halvveis-mark! Godt gjort.', easyNote: 'Aktiv restitusjon.' },
+  { phase: 'TOPPFASE', focus: 'Toppbelastning', km: 20, load: 'Hard', interval: 'Terskeløkt: 25 min halvmaraton-fart', long: '17 km', easy: '40 min rolig', intervalNote: 'Løp i planlagt race-fart. Finn rytmen.', longNote: 'Ikke for fort! Spare bein til race.', easyNote: 'Denne uka er krevende. Sov godt.' },
+  { phase: 'TOPPFASE', focus: 'Lengste tur', km: 22, load: 'Hard', interval: 'Terskeløkt: 30 min halvmaraton-fart', long: '18 km', easy: '40 min rolig', intervalNote: 'Race-fart over 30 min. Mental øvelse.', longNote: 'Lengste tur! Ta deg tid etterpå.', easyNote: 'Prioriter restitusjon etter langtur.' },
+  { phase: 'TOPPFASE', focus: 'Nær topp', km: 21, load: 'Hard', interval: '6×4 min hard / 2 min pause', long: '18 km', easy: '35 min rolig', intervalNote: 'Tilbake til intervaller. Fart-stimulans.', longNote: 'Andre lange tur på 18 km. Bra!', easyNote: 'Siste tunge uke starter.' },
+  { phase: 'TOPPFASE', focus: 'Siste storuke', km: 20, load: 'Medium+', interval: '5×4 min hard / 2 min pause', long: '16 km', easy: '30 min rolig', intervalNote: 'Begynn å kjenne at formen sitter.', longNote: 'Siste lange tur. 10 dager til race!', easyNote: 'Nedtrapping starter neste uke.' },
+  { phase: 'NEDTRAPPING', focus: 'Nedtrapping', km: 12, load: 'Lett', interval: '4×3 min / 2 min pause', long: '12 km', easy: '25 min rolig', intervalNote: 'Kort og skarp. Hold farten oppe.', longNote: 'Siste lange tur. Nyt den!', easyNote: 'Lett og løs. Ingen press.' },
+  { phase: 'RACE WEEK', focus: 'Race week 🏁', km: 5, load: 'Hvile', interval: '3×2 min lett jogg', long: 'RACE: 21,1 km', easy: '15 min lett jogg', intervalNote: 'Bare aktivere beina. Ingen anstrengelse.', longNote: '22. AUGUST — HALVMARATON! Lykke til 🎉', easyNote: 'Mandag lett jogg, resten hvile til race.' },
+];
+
+const WEEK_DAYS = ['MAN','TIR','ONS','TOR','FRE','LØR','SØN'];
+
+function getWeekSchedule(w) {
+  const wk = WEEKS[w];
+  const isLast = w === 11;
+  return [
+    { day: 'MAN', activities: [{type:'strength',label:'Styrke Dag 1'}], note: 'Bryst & Armer' },
+    { day: 'TIR', activities: [{type:'strength',label:'Styrke Dag 2'},{type:'run',label:'Lett løp'}], note: 'Ben-dag + ' + wk.easy },
+    { day: 'ONS', activities: [{type:'strength',label:'Styrke Dag 3'}], note: 'Rygg & Skuldre' },
+    { day: 'TOR', activities: [{type:'run',label: isLast ? '🏁 RACE' : 'Langtur'}], note: wk.long },
+    { day: 'FRE', activities: [{type:'strength',label:'Styrke Dag 1'}], note: 'Bryst & Armer' },
+    { day: 'LØR', activities: [{type:'strength',label:'Styrke Dag 3'},{type:'run',label:'Intervalløkt'}], note: 'Rygg/Skuldre + ' + wk.interval },
+    { day: 'SØN', activities: [{type:'rest',label:'Hviledag'}], note: 'Full restitusjon' },
+  ];
+}
+
+// ════════════════════════════════
+// STATE
+// ════════════════════════════════
+let currentMain = 0;
+let currentStrength = 0;
+let currentRunWeek = 0;
+let schedWeek = 0;
+
+const TOTALS = [13, 9, 10];
+const strState = { 0: {}, 1: {}, 2: {} };
+
+try {
+  const s = localStorage.getItem('haney_hm_str');
+  if (s) Object.assign(strState, JSON.parse(s));
+} catch(e){}
+
+function saveStr() {
+  try { localStorage.setItem('haney_hm_str', JSON.stringify(strState)); } catch(e){}
+}
+
+// ════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════
+function switchMain(i) {
+  document.querySelectorAll('.nav-tabs')[0].querySelectorAll('.nav-tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  document.querySelectorAll('#main-0,#main-1,#main-2,#main-3').forEach((p,j)=>p.classList.toggle('active',i===j));
+  currentMain = i;
+  if(i===1) renderSchedule();
+  if(i===3) renderRunWeek();
+}
+
+function switchStrength(i) {
+  const tabs = document.querySelectorAll('.nav-tabs')[1];
+  if(tabs) tabs.querySelectorAll('.nav-tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  document.querySelectorAll('#str-0,#str-1,#str-2,#str-3').forEach((p,j)=>p.classList.toggle('active',i===j));
+  currentStrength = i;
+}
+
+// ════════════════════════════════
+// STRENGTH
+// ════════════════════════════════
+function toggleEx(card) {
+  const day = parseInt(card.dataset.day);
+  const id = parseInt(card.dataset.id);
+  const detail = card.querySelector('.ex-detail');
+  if(event.target.closest('.ex-expand') || event.target.closest('.ex-detail')) {
+    card.classList.toggle('open');
+    detail.classList.toggle('open');
+    return;
+  }
+  if(strState[day][id]) { delete strState[day][id]; card.classList.remove('done'); }
+  else { strState[day][id]=true; card.classList.add('done'); card.classList.remove('open'); detail.classList.remove('open'); }
+  saveStr(); updateStrProgress();
+  if(Object.keys(strState[day]).length===TOTALS[day]) showToast('Dag '+(day+1)+' fullført! 💪',false);
+}
+
+function updateStrProgress() {
+  [0,1,2].forEach(day=>{
+    const done=Object.keys(strState[day]).length, total=TOTALS[day];
+    const bar=document.getElementById('sprog-'+day), cnt=document.getElementById('scnt-'+day);
+    if(bar) bar.style.width=(done/total*100)+'%';
+    if(cnt) cnt.textContent=done+' av '+total+' øvelser fullført';
+  });
+  document.querySelectorAll('.ex-card').forEach(card=>{
+    const d=parseInt(card.dataset.day),id=parseInt(card.dataset.id);
+    card.classList.toggle('done',!!strState[d][id]);
+  });
+}
+
+function resetCurrentDay() {
+  if(currentMain===2 && currentStrength < 3) {
+    strState[currentStrength]={};
+    saveStr(); updateStrProgress();
+    showToast('Dag nullstilt',false);
+  }
+}
+
+// ════════════════════════════════
+// PLAN OVERVIEW
+// ════════════════════════════════
+function renderPlan() {
+  const container = document.getElementById('weekList');
+  container.innerHTML = '';
+  WEEKS.forEach((wk,i) => {
+    const isCurrent = i === currentRunWeek;
+    const phaseClass = {BYGGEFASE:'phase-build',VOLUMFASE:'phase-volume',TOPPFASE:'phase-peak','NEDTRAPPING':'phase-taper','RACE WEEK':'phase-taper'}[wk.phase]||'phase-build';
+    const card = document.createElement('div');
+    card.className = 'week-card' + (isCurrent?' current':'');
+    card.innerHTML = `
+      <div class="week-card-header" onclick="toggleWeekCard(this.parentElement)">
+        <div class="wk-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="wk-info">
+          <div class="wk-phase">${wk.phase}</div>
+          <div class="wk-focus">${wk.focus} ${isCurrent?'<span class="current-badge">NÅVÆRENDE</span>':''}</div>
+          <div class="wk-pills">
+            <span class="wk-pill pill-run">🏃 ${wk.km} km langtur</span>
+            <span class="wk-pill pill-strength">💪 6 styrke</span>
+            <span class="wk-pill pill-rest" style="background:rgba(255,92,53,0.1);color:var(--accent3)">${wk.load}</span>
+          </div>
+        </div>
+        <div class="wk-expand">›</div>
+      </div>
+      <div class="week-days">${renderWeekDays(i)}</div>`;
+    container.appendChild(card);
+  });
+}
+
+function renderWeekDays(w) {
+  return getWeekSchedule(w).map(d=>`
+    <div class="day-row">
+      <div class="day-name">${d.day}</div>
+      <div class="day-activities">
+        ${d.activities.map(a=>`<div class="activity-tag ${a.type==='strength'?'at-strength':a.type==='run'?'at-run':'at-rest'}"><span class="at-icon">${a.type==='strength'?'🏋️':a.type==='run'?'🏃':'😴'}</span>${a.label}</div>`).join('')}
+        <div class="day-note">${d.note}</div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleWeekCard(card) {
+  card.classList.toggle('open');
+}
+
+// ════════════════════════════════
+// SCHEDULE
+// ════════════════════════════════
+function renderSchedule() {
+  const wk = WEEKS[schedWeek];
+  document.getElementById('schedWeekLabel').textContent = 'UKE '+(schedWeek+1);
+  document.getElementById('schedWeekSub').textContent = wk.phase + ' · ' + wk.focus;
+  document.getElementById('ssKm').textContent = wk.km+' km';
+  document.getElementById('ssLoad').textContent = wk.load;
+  document.getElementById('prevWeekBtn').disabled = schedWeek===0;
+  document.getElementById('nextWeekBtn').disabled = schedWeek===11;
+  document.getElementById('weekBadge').textContent = 'UKE '+(schedWeek+1);
+
+  const days = getWeekSchedule(schedWeek);
+  const container = document.getElementById('schedDays');
+  container.innerHTML = '';
+  days.forEach((d,i)=>{
+    const card = document.createElement('div');
+    card.className = 'sched-day-card';
+    const primary = d.activities.map(a=>a.label).join(' + ');
+    const badges = d.activities.map(a=>`<span class="sdc-badge ${a.type==='strength'?'badge-s':a.type==='run'?'badge-r':'badge-rest'}">${a.label}</span>`).join('');
+    card.innerHTML = `
+      <div class="sdc-header">
+        <div class="sdc-day">${d.day}</div>
+        <div class="sdc-content">
+          <div class="sdc-tags">${badges}</div>
+          <div class="sdc-secondary">${d.note}</div>
+        </div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function changeSchedWeek(dir) {
+  schedWeek = Math.max(0, Math.min(11, schedWeek+dir));
+  currentRunWeek = schedWeek;
+  renderSchedule();
+}
+
+// ════════════════════════════════
+// RUN SESSIONS
+// ════════════════════════════════
+function renderRunWeekSelector() {
+  const sel = document.getElementById('runWeekSelector');
+  sel.innerHTML = WEEKS.map((w,i)=>`<button class="rws-btn${i===currentRunWeek?' active':''}" onclick="selectRunWeek(${i})">UKE ${i+1}</button>`).join('');
+}
+
+function selectRunWeek(i) {
+  currentRunWeek=i; schedWeek=i;
+  renderRunWeekSelector(); renderRunWeek();
+  document.getElementById('weekBadge').textContent='UKE '+(i+1);
+}
+
+function renderRunWeek() {
+  const wk = WEEKS[currentRunWeek];
+  renderRunWeekSelector();
+  const container = document.getElementById('runSessions');
+  const sessions = [
+    { type:'easy', icon:'🦶', name:'Lett løp', when:'Tirsdag (etter ben-dag)', detail: wk.easy, steps: [
+      {t:'Oppvarming',d:'5 min gåing eller lett trav'},
+      {t:'Løp',d:`<strong>${wk.easy}</strong> — komfortabelt tempo, du skal kunne prate`},
+      {t:'Nedkjøling',d:'5 min gåing + tøying av legg og hoftefleksor'}
+    ], note: wk.easyNote },
+    { type:'interval', icon:'⚡', name:'Intervalløkt', when:'Lørdag (etter ben-dag)', detail: wk.interval, steps: [
+      {t:'Oppvarming',d:'10 min rolig jogg'},
+      {t:'Intervaller',d:`<strong>${wk.interval}</strong>`},
+      {t:'Nedkjøling',d:'10 min rolig jogg + dynamisk tøying'}
+    ], note: wk.intervalNote },
+    { type:'long', icon:'🏃', name: currentRunWeek===11?'🏁 HALVMARATON':'Langtur', when:'Torsdag', detail: wk.long, steps: [
+      {t:'Oppvarming',d:'5 min lett jogg'},
+      {t:'Løp',d:`<strong>${wk.long}</strong>`},
+      {t:'Nedkjøling',d:'Gå 5 min, drikk vann, tøy grundig etterpå'}
+    ], note: wk.longNote },
+  ];
+
+  const phaseColors = {BYGGEFASE:'rgba(200,240,0,0.08)',VOLUMFASE:'rgba(255,140,66,0.08)',TOPPFASE:'rgba(255,92,53,0.08)',NEDTRAPPING:'rgba(0,229,200,0.08)','RACE WEEK':'rgba(255,92,53,0.1)'};
+  container.innerHTML = `
+    <div class="run-tip-box" style="background:${phaseColors[wk.phase]||'rgba(255,140,66,0.06)'}; margin:0 0 4px;">
+      <strong>${wk.phase} · UKE ${currentRunWeek+1}</strong><br>${wk.focus} · Belastning: ${wk.load}
+    </div>` +
+    sessions.map(s=>`
+    <div class="run-card" id="rc-${s.type}">
+      <div class="rc-header" onclick="toggleRunCard('${s.type}')">
+        <div class="rc-type-icon icon-${s.type}">${s.icon}</div>
+        <div class="rc-info">
+          <div class="rc-name">${s.name}</div>
+          <div class="rc-meta">${s.when} · ${s.detail}</div>
+        </div>
+        <div class="rc-expand">›</div>
+      </div>
+      <div class="rc-detail">
+        <div class="rc-detail-label">ØKTPLAN</div>
+        <div class="rc-steps">
+          ${s.steps.map((st,i)=>`<div class="rc-step"><div class="rc-step-num">${i+1}</div><div class="rc-step-text"><strong>${st.t}:</strong> ${st.d}</div></div>`).join('')}
+        </div>
+        <div style="margin-top:10px;padding:10px;background:rgba(255,140,66,0.08);border-radius:8px;font-size:12px;color:var(--muted2);">
+          💡 ${s.note}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleRunCard(type) {
+  const card = document.getElementById('rc-'+type);
+  card.classList.toggle('open');
+  card.querySelector('.rc-expand').style.transform = card.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+
+// ════════════════════════════════
+// COUNTDOWN
+// ════════════════════════════════
+function renderCountdown() {
+  const now = new Date();
+  const diff = RACE_DATE - now;
+  const days = Math.max(0, Math.floor(diff/(1000*60*60*24)));
+  const weeks = Math.floor(days/7);
+  const rem = days % 7;
+  document.getElementById('countdown').innerHTML = `
+    <div class="countdown-box"><div class="cd-val">${weeks}</div><div class="cd-label">Uker</div></div>
+    <div class="countdown-box"><div class="cd-val">${rem}</div><div class="cd-label">Dager</div></div>
+    <div class="countdown-box"><div class="cd-val">${days}</div><div class="cd-label">Totalt</div></div>`;
+}
+
+// ════════════════════════════════
+// TOAST
+// ════════════════════════════════
+function showToast(msg, isRun=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isRun?' run-toast':'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ════════════════════════════════
+// INIT
+// ════════════════════════════════
+renderPlan();
+renderSchedule();
+renderRunWeek();
+renderCountdown();
+updateStrProgress();
+</script>
+</body>
+</html>
